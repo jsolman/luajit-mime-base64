@@ -13,6 +13,9 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+util = {}
+
+local ffi = require'ffi'
 local bit = require'bit'
 local rshift = bit.rshift
 local lshift = bit.lshift
@@ -123,3 +126,5 @@ function util.to_base64(d,sz)
     end
     return ffi.string(m64_arr,p)
 end
+
+return util

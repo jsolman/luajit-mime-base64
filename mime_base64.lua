@@ -13,7 +13,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-util = {}
+escape = {}
 
 local ffi = require'ffi'
 local bit = require'bit'
@@ -35,17 +35,17 @@ local u8arr= ffi.typeof'uint8_t[?]'
 local u16ptr=ffi.typeof'uint16_t*'
 local u8ptr=ffi.typeof'uint8_t*'
 
--- takes Mime Base64 encoded input string
--- @param d A Mime Base64 encoded string or cdata
--- @param sz (Number) length of d, optional if d is a string
--- @return string with binary decoded data
-function util.from_base64(d,sz)
-    if type(d)=="string" then sz=#d end
+--- Base64 decode a string or a FFI char *.
+-- @param str (String or char*) Bytearray to decode.
+-- @param sz (Number) Length of string to decode, optional if str is a Lua string
+-- @return (String) Decoded string.
+function escape.base64_decode(str, sz)
+    if (type(str)=="string") and (sz == nil) then sz=#str end
     local m64, b1, b2 -- value 0 and 63, partial byte, decoded byte
     local p = 0 -- position in binary output array
     local boff = 6 -- bit offset, alternates 0, 2, 4, 6
     local bin_arr=ffi.new(u8arr, floor(bit.rshift(sz*3,2)))
-    local bptr = ffi.cast(u8ptr,d)
+    local bptr = ffi.cast(u8ptr,str)
 
     for i=0,sz-1 do
         m64 = mime64lookup[bptr[i]]
@@ -69,6 +69,7 @@ function util.from_base64(d,sz)
     return ffi.string(bin_arr, p)
 end
 
+
 local mime64shorts=ffi.new('uint16_t[4096]')
 for i=0,63 do
     for j=0,63 do
@@ -83,18 +84,18 @@ for i=0,63 do
 end
 
 local eq=string.byte('=')
--- Convert binary data to MIME base64
--- @param d A data string or a cdata pointer (from FFI)
--- @param sz (Number) Length of d, optional if d is a string.
--- @return base64 encoded string
-function util.to_base64(d,sz)
-    if type(d)=="string" then sz=#d end
+--- Base64 encode binary data of a string or a FFI char *.
+-- @param str (String or char*) Bytearray to encode.
+-- @param sz (Number) Length of string to encode, optional if str is a Lua string
+-- @return (String) Encoded base64 string.
+function escape.base64_encode(str, sz)
+    if (type(str)=="string") and (sz == nil) then sz=#str end
     local outlen = floor(sz*4/3)
     outlen = outlen + floor(outlen/38)+5
     local m64_arr=ffi.new(u8arr,outlen)
     local m64wptr
     local l,p,c,v=0,0,76
-    local bptr = ffi.cast(u8ptr,d)
+    local bptr = ffi.cast(u8ptr,str)
     local bend=bptr+sz
     ::while_3bytes::
         if bptr+3>bend then goto break3 end

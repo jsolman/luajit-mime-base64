@@ -56,7 +56,7 @@ function escape.base64_decode(str, sz)
                 boff=0
             else
                 if boff ~= 4 then
-                    b2 = bit.bor(b1,rshift(m64, 4-boff))
+                    b2 = bor(b1,rshift(m64, 4-boff))
                     b1 = lshift(m64,boff+4)
                 else
                     b2 = bor(b1, m64)

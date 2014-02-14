@@ -128,4 +128,4 @@ function escape.base64_encode(str, sz)
     return ffi.string(m64_arr,p)
 end
 
-return util
+return escape

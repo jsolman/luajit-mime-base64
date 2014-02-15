@@ -41,32 +41,41 @@ local u8ptr=ffi.typeof'uint8_t*'
 -- @return (String) Decoded string.
 function escape.base64_decode(str, sz)
     if (type(str)=="string") and (sz == nil) then sz=#str end
-    local m64, b1, b2 -- value 0 and 63, partial byte, decoded byte
-    local p = 0 -- position in binary output array
-    local boff = 6 -- bit offset, alternates 0, 2, 4, 6
+    local m64, b1 -- value 0 to 63, partial byte
     local bin_arr=ffi.new(u8arr, floor(bit.rshift(sz*3,2)))
+    local mptr = ffi.cast(u8ptr,bin_arr) -- position in binary mime64 output array
     local bptr = ffi.cast(u8ptr,str)
-
-    for i=0,sz-1 do
-        m64 = mime64lookup[bptr[i]]
-        -- skip non-mime characters like newlines
-        if m64 ~= 0xFF then
-            if boff==6 then
-                b1=lshift(m64, 2)
-                boff=0
-            else
-                if boff ~= 4 then
-                    b2 = bor(b1,rshift(m64, 4-boff))
-                    b1 = lshift(m64,boff+4)
-                else
-                    b2 = bor(b1, m64)
-                end
-                bin_arr[p] = b2; p=p+1
-                boff=boff+2
-            end
-        end
+	   local i = 0
+    while true do
+        repeat
+            if i >= sz then goto done end
+            m64 = mime64lookup[bptr[i]]
+            i=i+1
+        until m64 ~= 0xFF -- skip non-mime characters like newlines
+        b1=lshift(m64, 2)
+        repeat
+            if i >= sz then goto done end
+            m64 = mime64lookup[bptr[i]]
+            i=i+1
+        until m64 ~= 0xFF -- skip non-mime characters like newlines
+        mptr[0] = bor(b1,rshift(m64, 4)); mptr=mptr+1
+        b1 = lshift(m64,4)
+        repeat
+            if i >= sz then goto done end
+            m64 = mime64lookup[bptr[i]]
+            i=i+1
+        until m64 ~= 0xFF -- skip non-mime characters like newlines
+        mptr[0] = bor(b1,rshift(m64, 2)); mptr=mptr+1
+        b1 = lshift(m64,6)
+        repeat
+            if i >= sz then goto done end
+            m64 = mime64lookup[bptr[i]]
+            i=i+1
+        until m64 ~= 0xFF -- skip non-mime characters like newlines
+        mptr[0] = bor(b1, m64); mptr=mptr+1
     end
-    return ffi.string(bin_arr, p)
+::done::
+    return ffi.string(bin_arr, (mptr-bin_arr))
 end
 
 

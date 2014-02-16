@@ -109,8 +109,7 @@ function escape.base64_encode(str, sz)
     outlen = outlen + floor(outlen/38)+5
     local m64_arr=ffi.new(u8arr,outlen)
     local l,p,v=0,0
-    local bptrAnchor = ffi.cast(u8ptr,str)
-    local bptr = bptrAnchor
+    local bptr = ffi.cast(u8ptr,str)
     local m64wptr = ffi.cast(u16ptr,m64_arr)
     local nlptr = m64wptr+38 -- put a new line after every 76 characters
     local i=0

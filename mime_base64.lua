@@ -45,7 +45,7 @@ function escape.base64_decode(str, sz)
     local bin_arr=ffi.new(u8arr, floor(bit.rshift(sz*3,2)))
     local mptr = ffi.cast(u8ptr,bin_arr) -- position in binary mime64 output array
     local bptr = ffi.cast(u8ptr,str)
-	   local i = 0
+    local i = 0
     while true do
         repeat
             if i >= sz then goto done end

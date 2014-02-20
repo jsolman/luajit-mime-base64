@@ -130,11 +130,11 @@ function escape.base64_encode(str, sz)
     if l>0 then
         -- Add trailing equal sign padding
         if l==1 then
-			-- 1 byte encoded needs two trailing equal signs
-			m64arr[k-1]=bor(lshift(eq,8),eq)
+            -- 1 byte encoded needs two trailing equal signs
+            m64arr[k-1]=bor(lshift(eq,8),eq)
         else
-			-- 2 bytes encoded needs one trailing equal sign
-			(ffi.cast(u8ptr,m64arr))[lshift(k,1)-1]=eq
+            -- 2 bytes encoded needs one trailing equal sign
+            (ffi.cast(u8ptr,m64arr))[lshift(k,1)-1]=eq
         end
     else
         l=sz-i -- get remaining len (1 or 2 bytes)
